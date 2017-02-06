@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/unit_celsius"
+        android:title="@string/celsius" />
+
+    <item
+        android:id="@+id/unit_fahrenheit"
+        android:title="@string/fahrenheit" />
+
+</menu>
