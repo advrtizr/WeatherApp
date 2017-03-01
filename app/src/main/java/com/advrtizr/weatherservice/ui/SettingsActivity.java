@@ -14,9 +14,12 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.advrtizr.weatherservice.R;
+import com.advrtizr.weatherservice.model.LocationAdapter;
+
+import java.util.Map;
+import java.util.Set;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -24,28 +27,36 @@ import butterknife.ButterKnife;
 public class SettingsActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
 
     @BindView(R.id.location_layout)
-    RelativeLayout locLayout;
+    RelativeLayout locItem;
     @BindView(R.id.temp_unit_layout)
-    RelativeLayout unitLayout;
+    RelativeLayout unitItem;
     @BindView(R.id.temp_unit_value)
     TextView tempValue;
+    @BindView(R.id.location_value)
+    TextView locValue;
 
     private SharedPreferences sharedPreferences;
+
+    public static final String SETTINGS_PREF = "settings_pref";
+    public static final String UNIT = "unit";
+    public static final String LOCATION = "location";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         ButterKnife.bind(this);
-        sharedPreferences = getSharedPreferences("weather_settings", MODE_PRIVATE);
-        locLayout.setOnClickListener(this);
-        unitLayout.setOnClickListener(this);
+        locItem.setOnClickListener(this);
+        unitItem.setOnClickListener(this);
+        tempValue.setText(restoreUnits(UNIT));
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
+        sharedPreferences = getSharedPreferences(LocationActivity.LOCATION_PREF, MODE_PRIVATE);
+        locValue.setText(setLocation(sharedPreferences));
     }
 
     @Override
@@ -75,35 +86,49 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         v.startAnimation(scale);
     }
 
+    public String setLocation(SharedPreferences sPref){
+        String location = "";
+        Map<String, ?> locationMap = sPref.getAll();
+        for(Map.Entry<String, ?> entry : locationMap.entrySet()){
+            if(entry != null){
+                String key = entry.getKey();
+                location = sPref.getString(key, null);
+            }
+        }
+        return location;
+    }
+
+    public void saveUnits(int resource, TextView view, String key) {
+        view.setText(resource);
+
+        sharedPreferences = getSharedPreferences(SETTINGS_PREF, MODE_PRIVATE);
+        if(resource != 0){
+            sharedPreferences.edit().putInt(key, resource).apply();
+        }
+    }
+
+    public int restoreUnits(String key) {
+        int defaultValue = R.id.unit_celsius;
+        sharedPreferences = getSharedPreferences(SETTINGS_PREF, MODE_PRIVATE);
+        int prefEntry = sharedPreferences.getInt(key, 0);
+
+        if(prefEntry != 0){
+            return prefEntry;
+        }
+        return defaultValue;
+    }
+
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.unit_celsius:
-                tempValue.setText(R.string.celsius);
+                saveUnits(R.string.celsius, tempValue, UNIT);
                 return true;
             case R.id.unit_fahrenheit:
-                tempValue.setText(R.string.fahrenheit);
+                saveUnits(R.string.fahrenheit, tempValue, UNIT);
                 return true;
             default:
                 return false;
-
         }
     }
-
-
-    //    public void saveSettings(){
-//        String[] values = new String[3];
-//        values[0] = etCountry.getText().toString();
-//        values[1] = etCity.getText().toString();
-//        values[2] = etUnits.getText().toString();
-//        for(int i = 0; i < values.length; i++){
-//            sharedPreferences.edit().putString(String.valueOf(i), values[i]).apply();
-//        }
-//    }
-//
-//    public void restoreSettings(){
-//        etCountry.setText(sharedPreferences.getString("0", null));
-//        etCity.setText(sharedPreferences.getString("1", null));
-//        etUnits.setText(sharedPreferences.getString("2", null));
-//    }
 }

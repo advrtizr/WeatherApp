@@ -3,14 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/menu_settings"
-        android:title="@string/menu_settings" />
-
-    <item
-        android:id="@+id/main_refresh"
-        android:title="@string/main_refresh"
+        android:id="@+id/location_clear"
+        android:title="@string/location_clear"
         android:orderInCategory="1"
-        android:icon="@drawable/icon_refresh"
+        android:icon="@android:drawable/ic_menu_close_clear_cancel"
         app:showAsAction="always"/>
 
 </menu>

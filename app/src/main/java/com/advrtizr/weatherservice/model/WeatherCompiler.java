@@ -50,7 +50,7 @@ public class WeatherCompiler {
 
     public void setWeatherFromRequest() {
 
-        String YQL = Constants.LOCATION_PART + loc + Constants.UNIT_PART + tempUnit + Constants.END_PART;
+        String YQL = Constants.LOCATION_PART + loc + Constants.UNIT_PART + tempUnit.charAt(0) + Constants.END_PART;
         WeatherRequest request = retrofit.create(WeatherRequest.class);
         progressDialog.show();
         request.getWeatherInfo(YQL).enqueue(new Callback<WeatherInfo>() {

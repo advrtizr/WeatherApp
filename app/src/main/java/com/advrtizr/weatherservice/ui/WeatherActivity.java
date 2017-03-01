@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -22,11 +23,7 @@ public class WeatherActivity extends AppCompatActivity {
     TextView temperature;
     @BindView(R.id.tv_conditions)
     TextView conditions;
-    @BindView(R.id.btn_refresh)
-    Button btnRefresh;
 
-    private String country;
-    private String city;
     private String unit;
     private String location;
     private WeatherCompiler weatherCompiler;
@@ -38,18 +35,6 @@ public class WeatherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_weather);
         ButterKnife.bind(this);
         loadFromSave();
-        btnRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                weatherSettings = getSharedPreferences("weather_settings", MODE_PRIVATE);
-                country = weatherSettings.getString("0", null);
-                city = weatherSettings.getString("1", null);
-                unit = weatherSettings.getString("2", null);
-                location = city + ", " + country;
-                weatherCompiler = new WeatherCompiler(WeatherActivity.this, location, unit);
-                weatherCompiler.setWeatherFromRequest();
-            }
-        });
     }
 
     public void loadFromSave(){
@@ -77,6 +62,13 @@ public class WeatherActivity extends AppCompatActivity {
                 Intent intent = new Intent(this, SettingsActivity.class);
                 startActivity(intent);
                 return true;
+            case R.id.main_refresh:
+                weatherSettings = getSharedPreferences(SettingsActivity.SETTINGS_PREF, MODE_PRIVATE);
+                int unitResource = weatherSettings.getInt(SettingsActivity.UNIT, 0);
+                unit = getResources().getResourceEntryName(unitResource);
+                location = new SettingsActivity().setLocation(getSharedPreferences(LocationActivity.LOCATION_PREF, MODE_PRIVATE));
+                weatherCompiler = new WeatherCompiler(WeatherActivity.this, location, unit);
+                weatherCompiler.setWeatherFromRequest();
         }
         return super.onOptionsItemSelected(item);
     }

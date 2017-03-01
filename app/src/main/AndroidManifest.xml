@@ -19,7 +19,6 @@
         </activity>
         <activity android:name=".ui.SettingsActivity" />
         <activity android:name=".ui.LocationActivity" />
-        <activity android:name=".ui.TempUnitActivity"></activity>
     </application>
 
 </manifest>
