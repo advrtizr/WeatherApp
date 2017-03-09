@@ -2,9 +2,10 @@ package com.advrtizr.weatherservice.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.widget.CompoundButton;
 
 import com.advrtizr.weatherservice.Constants;
+import com.advrtizr.weatherservice.interfaces.OnRequestFinishListener;
+import com.advrtizr.weatherservice.interfaces.WeatherRequest;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,8 +43,6 @@ public class WeatherCompiler implements WeatherModel {
                     } else {
                         getWeather(listener);
                     }
-                } else {
-
                 }
             }
 

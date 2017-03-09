@@ -1,7 +1,6 @@
 package com.advrtizr.weatherservice.ui;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
@@ -16,15 +15,14 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.advrtizr.weatherservice.R;
-import com.advrtizr.weatherservice.model.LocationAdapter;
-
-import java.util.Map;
-import java.util.Set;
+import com.advrtizr.weatherservice.presenter.SettingsPresenter;
+import com.advrtizr.weatherservice.presenter.SettingsPresenterImpl;
+import com.advrtizr.weatherservice.view.SettingsView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class SettingsActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener {
+public class SettingsActivity extends AppCompatActivity implements View.OnClickListener, PopupMenu.OnMenuItemClickListener, SettingsView {
 
     @BindView(R.id.location_layout)
     RelativeLayout locItem;
@@ -32,31 +30,24 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     RelativeLayout unitItem;
     @BindView(R.id.temp_unit_value)
     TextView tempValue;
-    @BindView(R.id.location_value)
-    TextView locValue;
 
-    private SharedPreferences sharedPreferences;
-
-    public static final String SETTINGS_PREF = "settings_pref";
-    public static final String UNIT = "unit";
-    public static final String LOCATION = "location";
+    private SettingsPresenter presenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         ButterKnife.bind(this);
+        presenter = new SettingsPresenterImpl(this);
         locItem.setOnClickListener(this);
         unitItem.setOnClickListener(this);
-        tempValue.setText(restoreUnits(UNIT));
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        sharedPreferences = getSharedPreferences(LocationActivity.LOCATION_PREF, MODE_PRIVATE);
-        locValue.setText(setLocation(sharedPreferences));
+        presenter.loadSettings();
     }
 
     @Override
@@ -86,49 +77,24 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
         v.startAnimation(scale);
     }
 
-    public String setLocation(SharedPreferences sPref){
-        String location = "";
-        Map<String, ?> locationMap = sPref.getAll();
-        for(Map.Entry<String, ?> entry : locationMap.entrySet()){
-            if(entry != null){
-                String key = entry.getKey();
-                location = sPref.getString(key, null);
-            }
-        }
-        return location;
-    }
-
-    public void saveUnits(int resource, TextView view, String key) {
-        view.setText(resource);
-
-        sharedPreferences = getSharedPreferences(SETTINGS_PREF, MODE_PRIVATE);
-        if(resource != 0){
-            sharedPreferences.edit().putInt(key, resource).apply();
-        }
-    }
-
-    public int restoreUnits(String key) {
-        int defaultValue = R.id.unit_celsius;
-        sharedPreferences = getSharedPreferences(SETTINGS_PREF, MODE_PRIVATE);
-        int prefEntry = sharedPreferences.getInt(key, 0);
-
-        if(prefEntry != 0){
-            return prefEntry;
-        }
-        return defaultValue;
-    }
-
     @Override
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.unit_celsius:
-                saveUnits(R.string.celsius, tempValue, UNIT);
+                presenter.saveToSettings("C");
+                presenter.loadSettings();
                 return true;
             case R.id.unit_fahrenheit:
-                saveUnits(R.string.fahrenheit, tempValue, UNIT);
+                presenter.saveToSettings("F");
+                presenter.loadSettings();
                 return true;
             default:
                 return false;
         }
+    }
+
+    @Override
+    public void displayState(String unit) {
+        tempValue.setText(unit);
     }
 }

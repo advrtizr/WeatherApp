@@ -1,4 +1,6 @@
-package com.advrtizr.weatherservice.model;
+package com.advrtizr.weatherservice.interfaces;
+
+import com.advrtizr.weatherservice.model.WeatherInfo;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
