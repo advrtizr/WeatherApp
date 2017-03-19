@@ -41,6 +41,7 @@ public class LocationActivity extends AppCompatActivity {
         locList = loadFile();
         locationAdapter = new LocationAdapter(this, locList);
         locRecycler.setLayoutManager(new LinearLayoutManager(this));
+        locRecycler.setClickable(true);
         locRecycler.setAdapter(locationAdapter);
     }
 

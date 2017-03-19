@@ -23,13 +23,12 @@ public class WeatherCompiler implements WeatherModel {
     public WeatherCompiler(Context context) {
         retrofit = new Retrofit.Builder().baseUrl(Constants.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create()).build();
-        savedWeatherData = context.getSharedPreferences("save_weather_data", MODE_PRIVATE);
+        savedWeatherData = context.getSharedPreferences(SettingsInteractorImpl.SETTINGS_PREF, MODE_PRIVATE);
     }
 
     @Override
-    public void getWeather(final OnRequestFinishListener listener) {
-        String location = "Moscow";
-        String unit = "c";
+    public void getWeather(final OnRequestFinishListener listener, final String location) {
+        String unit = savedWeatherData.getString(SettingsInteractorImpl.UNIT, null);
         String YQL = Constants.LOCATION_PART + location + Constants.UNIT_PART + unit + Constants.END_PART;
         WeatherRequest request = retrofit.create(WeatherRequest.class);
         request.getWeatherInfo(YQL).enqueue(new Callback<WeatherInfo>() {
@@ -41,7 +40,7 @@ public class WeatherCompiler implements WeatherModel {
                     if (responseCount != 0) {
                         listener.onResult(weatherInfo);
                     } else {
-                        getWeather(listener);
+                        getWeather(listener, location);
                     }
                 }
             }

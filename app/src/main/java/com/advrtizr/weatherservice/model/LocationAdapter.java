@@ -3,10 +3,11 @@ package com.advrtizr.weatherservice.model;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
@@ -21,7 +22,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     private Context context;
     private List<String> locList = new ArrayList<>();
     private SharedPreferences locationPref;
-    private final int MAX_CHECKED = 1;
+    private final int MAX_CHECKED = 10;
 
     public LocationAdapter(Context context, List<String> locList) {
         this.context = context;
@@ -61,7 +62,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         return locList.size();
     }
 
-    public void disableCheck(LocationHolder holder) {
+    private void disableCheck(LocationHolder holder) {
         if (maxCounter() == MAX_CHECKED) {
             holder.itemView.setEnabled(holder.checkBox.isChecked());
             holder.checkBox.setEnabled(holder.checkBox.isChecked());
@@ -71,7 +72,7 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         }
     }
 
-    public int maxCounter() {
+    private int maxCounter() {
         int maxCounter = 0;
         for (int i = 0; i < locList.size(); i++) {
             if (locationPref.contains(String.valueOf(i))) {
@@ -81,9 +82,8 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         return maxCounter;
     }
 
-    public void checkStatus(int key, LocationHolder holder) {
+    private void checkStatus(int key, LocationHolder holder) {
         boolean isContain = locationPref.contains(String.valueOf(key));
-        Log.i("counter", String.valueOf(isContain) + String.valueOf(key));
         holder.checkBox.setChecked(isContain);
         disableCheck(holder);
     }
@@ -92,10 +92,11 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         TextView location;
         CheckBox checkBox;
 
-        public LocationHolder(View itemView) {
+        LocationHolder(View itemView) {
             super(itemView);
             location = (TextView) itemView.findViewById(R.id.location_city);
             checkBox = (CheckBox) itemView.findViewById(R.id.location_checkbox);
+            checkBox.setClickable(false);
         }
     }
 }

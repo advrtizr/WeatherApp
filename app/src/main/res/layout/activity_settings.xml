@@ -11,37 +11,6 @@
     tools:context="com.advrtizr.weatherservice.ui.SettingsActivity">
 
     <RelativeLayout
-        android:id="@+id/location_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="10dp">
-
-        <LinearLayout
-            android:id="@+id/location_text_block"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/location_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/settings_location_title"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/location_menu_button"
-            style="@style/MenuArrow"
-            android:src="@drawable/icon_arrow"/>
-    </RelativeLayout>
-
-    <View style="@style/ViewLineSeparator" />
-
-    <RelativeLayout
         android:id="@+id/temp_unit_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
