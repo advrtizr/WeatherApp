@@ -32,7 +32,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
 
 
     @BindView(R.id.weather_card_container)
-    RecyclerView weatherCards;
+    RecyclerView recyclerView;
     @BindView(R.id.activity_weather)
     CoordinatorLayout coordinatorLayout;
     @BindView(R.id.fab_add)
@@ -61,7 +61,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
 
     private void initializeFab(){
         fabAdd.setOnClickListener(this);
-        weatherCards.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                 if (dy > 0 && fabAdd.isShown())
@@ -95,9 +95,9 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
             presenters.add(new WeatherPresenterImpl(this, this, city));
         }
         weatherAdapter = new WeatherAdapter(this, keys, presenters, locationPreferences);
-        weatherCards.setLayoutManager(new LinearLayoutManager(this));
-        weatherCards.hasFixedSize();
-        weatherCards.setAdapter(weatherAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.hasFixedSize();
+        recyclerView.setAdapter(weatherAdapter);
     }
 
     @Override
@@ -113,13 +113,13 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
     @Override
     public void onRequestSuccess() {
         weatherAdapter.notifyDataSetChanged();
-        snackbar.setText("Refreshed");
+        snackbar.setText(R.string.snackbar_refreshed);
         snackbar.show();
     }
 
     @Override
     public void onRequestError(Throwable t) {
-        snackbar.setText("Please check internet connection...");
+        snackbar.setText(R.string.snackbar_connection_error);
         snackbar.show();
     }
 

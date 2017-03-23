@@ -16,4 +16,6 @@
     <string name="location_clear">Clear</string>
     <string name="main_refresh">Refresh</string>
     <string name="settings_default_value">По умолчанию единица измерения Цельсий</string>
+    <string name="snackbar_refreshed">Обновлено</string>
+    <string name="snackbar_connection_error">Пожалуйста, проверьте подключение</string>
 </resources>
