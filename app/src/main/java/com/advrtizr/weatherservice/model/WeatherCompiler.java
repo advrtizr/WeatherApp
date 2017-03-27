@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import com.advrtizr.weatherservice.Constants;
 import com.advrtizr.weatherservice.interfaces.OnRequestFinishListener;
 import com.advrtizr.weatherservice.interfaces.WeatherRequest;
+import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -15,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class WeatherCompiler{
+public class WeatherCompiler implements WeatherModel{
 
     private Retrofit retrofit;
     private SharedPreferences savedWeatherData;
@@ -26,7 +27,7 @@ public class WeatherCompiler{
         savedWeatherData = context.getSharedPreferences(SettingsInteractorImpl.SETTINGS_PREF, MODE_PRIVATE);
     }
 
-
+    @Override
     public void getWeather(final OnRequestFinishListener listener, final String location) {
         String unit = savedWeatherData.getString(SettingsInteractorImpl.UNIT, null);
         String YQL = Constants.LOCATION_PART + location + Constants.UNIT_PART + unit + Constants.END_PART;

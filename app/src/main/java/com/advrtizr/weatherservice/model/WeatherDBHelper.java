@@ -12,7 +12,8 @@ public class WeatherDBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "WeatherDatabase";
 
     public static final String TABLE_NAME = "weatherinfo";
-    public static final String _ID = "_id";
+    public static final String PRIMARY_ID = "_id";
+    public static final String ENTRY_ID = "entry";
     public static final String CITY = "city";
     public static final String COUNTRY = "country";
     public static final String TEMPERATURE = "temperature";
@@ -24,7 +25,8 @@ public class WeatherDBHelper extends SQLiteOpenHelper {
     private static final String COMMA_SEP = ",";
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + TABLE_NAME + " (" +
-                    _ID + " INTEGER PRIMARY KEY," +
+                    PRIMARY_ID + " INTEGER PRIMARY KEY, " +
+                    ENTRY_ID + TEXT_TYPE + COMMA_SEP +
                     CITY + TEXT_TYPE + COMMA_SEP +
                     COUNTRY + TEXT_TYPE + COMMA_SEP +
                     TEMPERATURE + TEXT_TYPE + COMMA_SEP +
@@ -58,4 +60,6 @@ public class WeatherDBHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_DELETE_ENTRIES);
         onCreate(db);
     }
+
+
 }

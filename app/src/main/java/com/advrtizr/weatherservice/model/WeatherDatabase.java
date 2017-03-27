@@ -2,27 +2,25 @@ package com.advrtizr.weatherservice.model;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
-import com.advrtizr.weatherservice.interfaces.OnRequestFinishListener;
-import com.advrtizr.weatherservice.presenter.WeatherPresenter;
+import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 
-import java.util.List;
+public class WeatherDatabase {
 
-public class WeatherDatabase implements WeatherModel{
-
-    private WeatherDBHelper weatherDBHelper;
-    private WeatherCompiler weatherCompiler;
-    private SQLiteDatabase database;
     private Context context;
-    private List<WeatherInfo> weatherInfoList;
-    private List<WeatherPresenter> presenters;
+    private WeatherDBHelper weatherDBHelper;
+    private SQLiteDatabase database;
+    private int size;
 
-    public WeatherDatabase(Context context) {
+    public WeatherDatabase(Context context, SharedPreferences preferences) {
         this.context = context;
         weatherDBHelper = WeatherDBHelper.getInstance(context);
         database = weatherDBHelper.getWritableDatabase();
+        size = preferences.getAll().size();
     }
 
     public void saveEntry(WeatherInfo weatherInfo, int position) {
@@ -35,7 +33,7 @@ public class WeatherDatabase implements WeatherModel{
             String code = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getCode();
 
             ContentValues values = new ContentValues();
-            values.put(WeatherDBHelper._ID, position);
+            values.put(WeatherDBHelper.ENTRY_ID, position);
             values.put(WeatherDBHelper.CITY, city);
             values.put(WeatherDBHelper.COUNTRY, country);
             values.put(WeatherDBHelper.TEMPERATURE, temperature);
@@ -47,19 +45,10 @@ public class WeatherDatabase implements WeatherModel{
         }
     }
 
-    public void updateEntry(int position) {
-
-        String selection = WeatherDBHelper._ID + " LIKE ?";
-        String[] selectionArgs = {String.valueOf(position)};
-
-        database.update(WeatherDBHelper.TABLE_NAME, values, selection, selectionArgs);
-
-    }
-
-    public void getEntry(WeatherAdapter.WeatherViewHolder holder, int position) {
+    public void readEntry(WeatherAdapter.WeatherViewHolder holder, int position) {
         Cursor cursor = database.query(WeatherDBHelper.TABLE_NAME, null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
-            int idIndex = cursor.getColumnIndex(WeatherDBHelper._ID);
+            int idIndex = cursor.getColumnIndex(WeatherDBHelper.ENTRY_ID);
             int cityIndex = cursor.getColumnIndex(WeatherDBHelper.CITY);
             int countryIndex = cursor.getColumnIndex(WeatherDBHelper.COUNTRY);
             int temperatureIndex = cursor.getColumnIndex(WeatherDBHelper.TEMPERATURE);
@@ -77,20 +66,26 @@ public class WeatherDatabase implements WeatherModel{
                     int resource = context.getResources().getIdentifier("@drawable/icon_" + cursor.getString(codeIndex), null, context.getPackageName());
                     holder.conditionImage.setImageResource(resource);
                 }
+                Log.i("data", String.valueOf(cursor.getInt(idIndex)) + " " + cursor.getString(cityIndex));
             } while (cursor.moveToNext());
         }
         cursor.close();
     }
 
-    public void deleteEntry(int position) {
-        String selection = WeatherDBHelper._ID + " LIKE ?";
+    public void deleteEntry(int position, boolean pressed) {
+        String selection = WeatherDBHelper.ENTRY_ID + " LIKE ?";
         String[] selectionArgs = {String.valueOf(position)};
         database.delete(WeatherDBHelper.TABLE_NAME, selection, selectionArgs);
+        if(pressed){
+            for (int i = position; i < size + 1; i++) {
+                ContentValues values = new ContentValues();
+                values.put(WeatherDBHelper.ENTRY_ID, i);
+                String sel = WeatherDBHelper.ENTRY_ID + " LIKE ?";
+                String[] selArgs = {String.valueOf(i + 1)};
+                database.update(WeatherDBHelper.TABLE_NAME, values, sel, selArgs);
+            }
+        }
     }
 
-    @Override
-    public void getWeather(OnRequestFinishListener listener, String location) {
-
-    }
 }
 

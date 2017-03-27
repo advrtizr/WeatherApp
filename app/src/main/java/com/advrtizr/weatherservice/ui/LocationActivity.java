@@ -1,35 +1,33 @@
 package com.advrtizr.weatherservice.ui;
 
-import android.content.SharedPreferences;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.widget.EditText;
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.model.LocationAdapter;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
+import com.advrtizr.weatherservice.presenter.LocationPresenter;
+import com.advrtizr.weatherservice.presenter.LocationPresenterImpl;
+import com.advrtizr.weatherservice.view.LocationView;
 import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.internal.Utils;
 
-public class LocationActivity extends AppCompatActivity {
+public class LocationActivity extends AppCompatActivity implements LocationView {
 
     @BindView(R.id.location_recycler)
     RecyclerView locRecycler;
+    @BindView(R.id.et_filter)
+    EditText filter;
 
-    private List<String> locList;
     private LocationAdapter locationAdapter;
+    private Snackbar snackbar;
+    private Toolbar toolbar;
+    private LocationPresenter presenter;
 
     public static final String LOCATION_PREF = "location_pref";
 
@@ -38,48 +36,29 @@ public class LocationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
         ButterKnife.bind(this);
-        locList = loadFile();
-        locationAdapter = new LocationAdapter(this, locList);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        snackbar = Snackbar.make(locRecycler, "", Snackbar.LENGTH_SHORT);
+        presenter = new LocationPresenterImpl(this, filter);
+        presenter.onTextEdited();
         locRecycler.setLayoutManager(new LinearLayoutManager(this));
         locRecycler.setClickable(true);
+    }
+
+    @Override
+    public void displayLocation(List<String> filtered) {
+        locationAdapter = new LocationAdapter(this, filtered);
         locRecycler.setAdapter(locationAdapter);
     }
 
-    public ArrayList<String> loadFile(){
-        ArrayList<String> lines = new ArrayList<>();
-        try{
-            InputStream inputStream = getResources().openRawResource(R.raw.location);
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+    @Override
+    public void onRequestSuccess() {
 
-            String line;
-            while ((line = bufferedReader.readLine()) != null){
-                lines.add(line);
-            }
-            inputStream.close();
-        }
-        catch(java.io.IOException e){
-            e.printStackTrace();
-        }
-        return lines;
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.location_menu, menu);
-        return super.onCreateOptionsMenu(menu);
+    public void onRequestError(Throwable t) {
+        snackbar.setText(R.string.snackbar_connection_error);
+        snackbar.show();
     }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.location_clear:
-                SharedPreferences sp = getSharedPreferences(LOCATION_PREF, MODE_PRIVATE);
-                sp.edit().clear().apply();
-                locationAdapter.notifyDataSetChanged();
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
 }

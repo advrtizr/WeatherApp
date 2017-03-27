@@ -1,24 +1,12 @@
 package com.advrtizr.weatherservice.presenter;
 
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.support.v7.widget.LinearLayoutManager;
 
 import com.advrtizr.weatherservice.interfaces.OnRequestFinishListener;
-import com.advrtizr.weatherservice.model.WeatherAdapter;
 import com.advrtizr.weatherservice.model.WeatherCompiler;
-import com.advrtizr.weatherservice.model.WeatherDatabase;
-import com.advrtizr.weatherservice.model.WeatherInfo;
+import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 import com.advrtizr.weatherservice.model.WeatherModel;
-import com.advrtizr.weatherservice.ui.LocationActivity;
 import com.advrtizr.weatherservice.view.WeatherView;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishListener {
 
@@ -30,7 +18,7 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
     public WeatherPresenterImpl(Context context, WeatherView view, String location) {
         this.view = view;
         this.location = location;
-        this.model = new WeatherDatabase(context);
+        this.model = new WeatherCompiler(context);
     }
 
     @Override
@@ -45,8 +33,8 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
     }
 
     @Override
-    public void onResult(WeatherInfo weatherInfo) {
-        this.weatherInfo = weatherInfo;
+    public void onResult(Object obj) {
+        this.weatherInfo = (WeatherInfo) obj;
         view.hideProgress();
         view.onRequestSuccess();
     }

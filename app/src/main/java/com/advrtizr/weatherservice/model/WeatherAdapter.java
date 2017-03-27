@@ -1,10 +1,7 @@
 package com.advrtizr.weatherservice.model;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.advrtizr.weatherservice.R;
+import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 import com.advrtizr.weatherservice.presenter.WeatherPresenter;
 
 import java.util.List;
@@ -32,7 +30,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
         this.keys = keys;
         this.presenters = presenters;
         this.locationPreferences = preferences;
-        weatherDatabase = new WeatherDatabase(context);
+        weatherDatabase = new WeatherDatabase(context, preferences);
         makeFirstRequest();
     }
 
@@ -45,8 +43,8 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
     @Override
     public void onBindViewHolder(WeatherViewHolder holder, int position) {
         WeatherInfo weatherInfo = presenters.get(position).getWeatherInfo();
-        weatherDatabase.saveToDatabase(weatherInfo, position);
-        weatherDatabase.initFromSaved(holder, position);
+        weatherDatabase.saveEntry(weatherInfo, position);
+        weatherDatabase.readEntry(holder, position);
     }
 
 
@@ -83,6 +81,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.ib_refresh:
+                    weatherDatabase.deleteEntry(getAdapterPosition(), false);
                     presenters.get(getAdapterPosition()).loadWeather();
                     break;
                 case R.id.ib_delete:
@@ -92,9 +91,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
                     }
                     locationPreferences.edit().remove(key).apply();
                     presenters.remove(getAdapterPosition());
-                    String selection = WeatherDBHelper._ID + " LIKE ?";
-                    String[] selectionArgs = { String.valueOf(getAdapterPosition()) };
-                    database.delete(WeatherDBHelper.TABLE_NAME, selection, selectionArgs);
+                    weatherDatabase.deleteEntry(getAdapterPosition(), true);
                     notifyItemRemoved(getAdapterPosition());
                     break;
             }
