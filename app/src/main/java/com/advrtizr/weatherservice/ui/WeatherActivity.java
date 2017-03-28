@@ -29,7 +29,7 @@ import butterknife.ButterKnife;
 public class WeatherActivity extends AppCompatActivity implements WeatherView, View.OnClickListener {
 
 
-    @BindView(R.id.weather_card_container)
+    @BindView(R.id.card_container)
     RecyclerView recyclerView;
     @BindView(R.id.activity_weather)
     CoordinatorLayout coordinatorLayout;

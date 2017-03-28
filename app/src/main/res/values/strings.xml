@@ -18,4 +18,5 @@
     <string name="settings_default_value">По умолчанию единица измерения Цельсий</string>
     <string name="snackbar_refreshed">Обновлено</string>
     <string name="snackbar_connection_error">Пожалуйста, проверьте подключение</string>
+    <string name="search_city">Поиск…</string>
 </resources>

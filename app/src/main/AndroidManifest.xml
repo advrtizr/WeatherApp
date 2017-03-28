@@ -18,8 +18,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.SettingsActivity" />
-        <activity android:name=".ui.LocationActivity"
+        <activity
+            android:name=".ui.LocationActivity"
             android:theme="@style/NoActionbar"/>
     </application>
 
-</manifest>
+    </manifest>

@@ -1,31 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/activity_location"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.advrtizr.weatherservice.ui.LocationActivity">
+    android:orientation="vertical"
+    tools:context=".ui.LocationActivity">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/et_filter" />
-    </android.support.v7.widget.Toolbar>
+        app:popupTheme="@style/NoActionbar" />
+
+    <com.miguelcatalan.materialsearchview.MaterialSearchView
+        android:id="@+id/search_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:theme="@style/MaterialSearchViewStyle" />
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/location_recycler"
         android:layout_below="@id/toolbar"
+        android:id="@+id/location_recycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content" />
 
-    </android.support.v7.widget.RecyclerView>
 
 </RelativeLayout>

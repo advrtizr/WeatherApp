@@ -16,7 +16,7 @@ public class WeatherDatabase {
     private SQLiteDatabase database;
     private int size;
 
-    public WeatherDatabase(Context context, SharedPreferences preferences) {
+    WeatherDatabase(Context context, SharedPreferences preferences) {
         this.context = context;
         weatherDBHelper = WeatherDBHelper.getInstance(context);
         database = weatherDBHelper.getWritableDatabase();
