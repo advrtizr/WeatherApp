@@ -7,9 +7,9 @@ import com.advrtizr.weatherservice.R;
 
 public class SettingsInteractorImpl implements SettingsInteractor {
 
-    static final String SETTINGS_PREF = "settings_pref";
-    static final String UNIT = "unit";
-    static final String DEGREE = "\u00B0";
+    public static final String SETTINGS_PREF = "settings_pref";
+    public static final String UNIT = "unit";
+    public static final String DEGREE = "\u00B0";
     private SharedPreferences sharedPreferences;
     private Context context;
 

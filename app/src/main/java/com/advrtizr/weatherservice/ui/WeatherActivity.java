@@ -6,28 +6,26 @@ import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.model.WeatherAdapter;
+import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 import com.advrtizr.weatherservice.presenter.WeatherPresenter;
 import com.advrtizr.weatherservice.presenter.WeatherPresenterImpl;
 import com.advrtizr.weatherservice.view.WeatherView;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class WeatherActivity extends AppCompatActivity implements WeatherView, View.OnClickListener {
-
 
     @BindView(R.id.card_container)
     RecyclerView recyclerView;
@@ -35,12 +33,14 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
     CoordinatorLayout coordinatorLayout;
     @BindView(R.id.fab_add)
     FloatingActionButton fabAdd;
+    @BindView(R.id.swipe_container)
+    SwipeRefreshLayout refreshLayout;
 
     private WeatherAdapter weatherAdapter;
-    private Map<String, ?> locationList;
-    private List<WeatherPresenter> presenters;
-    private SharedPreferences locationPreferences;
     private Snackbar snackbar;
+    private WeatherPresenter presenter;
+    private ItemTouchHelper touchHelper;
+    private SharedPreferences locationPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,16 +48,74 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         setContentView(R.layout.activity_weather);
         ButterKnife.bind(this);
         snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_SHORT);
-        initializeFab();
+
+        locationPref = getSharedPreferences(LocationActivity.LOCATION_PREF, MODE_PRIVATE);
+        touchHelper = new ItemTouchHelper(callbackHelper());
+        touchHelper.attachToRecyclerView(recyclerView);
+
+        initFab();
+        initRefresh();
+        initPresenter();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        initializeAdapter();
     }
 
-    private void initializeFab(){
+    private ItemTouchHelper.Callback callbackHelper() {
+        return new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                presenter.moveItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                weatherAdapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+//                weatherAdapter.notifyItemRangeRemoved(0, previousContentSize);
+                return true;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                presenter.deleteItem(viewHolder.getAdapterPosition());
+                weatherAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
+            }
+        };
+    }
+
+    private void initAdapter(List<WeatherInfo> list){
+        weatherAdapter = new WeatherAdapter(this, list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.hasFixedSize();
+        recyclerView.setAdapter(weatherAdapter);
+    }
+
+
+    private void initPresenter() {
+        presenter = new WeatherPresenterImpl(WeatherActivity.this, locationPref);
+        presenter.requestWeather();
+    }
+
+    private void initRefresh() {
+        refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                if(locationPref.getAll().size() != 0){
+                    initPresenter();
+                }else{
+                    refreshLayout.setRefreshing(false);
+                    snackbar.setText(R.string.warning).show();
+                }
+            }
+        });
+        refreshLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshLayout.setRefreshing(false);
+            }
+        });
+    }
+
+    private void initFab() {
         fabAdd.setOnClickListener(this);
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -78,28 +136,6 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         });
     }
 
-    private void initializeAdapter() {
-        presenters = new ArrayList<>();
-        List<String> keys = new ArrayList<>();
-        locationPreferences = getSharedPreferences(LocationActivity.LOCATION_PREF, MODE_PRIVATE);
-        locationList = locationPreferences.getAll();
-        for (Map.Entry location : locationList.entrySet()) {
-            if (location == null) {
-                return;
-            }
-            String key = location.getKey().toString();
-            String city = location.getValue().toString();
-            keys.add(key);
-            WeatherPresenter presenter = new WeatherPresenterImpl(this, this, city);
-//            presenter.loadWeather();
-            presenters.add(presenter);
-        }
-        weatherAdapter = new WeatherAdapter(this, keys, presenters, locationPreferences);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.hasFixedSize();
-        recyclerView.setAdapter(weatherAdapter);
-    }
-
     @Override
     public void showProgress() {
 
@@ -107,19 +143,21 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
 
     @Override
     public void hideProgress() {
-
+        refreshLayout.setRefreshing(false);
     }
 
     @Override
-    public void onRequestSuccess() {
-        weatherAdapter.notifyDataSetChanged();
+    public void onRequestSuccess(List<WeatherInfo> list) {
+        initAdapter(list);
         snackbar.setText(R.string.snackbar_refreshed);
         snackbar.show();
     }
 
     @Override
-    public void onRequestError(Throwable t) {
+    public void onRequestError(List<WeatherInfo> list) {
+        initAdapter(list);
         snackbar.setText(R.string.snackbar_connection_error);
+        refreshLayout.setRefreshing(false);
         snackbar.show();
     }
 

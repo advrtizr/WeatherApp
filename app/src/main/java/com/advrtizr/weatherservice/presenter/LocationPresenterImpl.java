@@ -18,6 +18,9 @@ public class LocationPresenterImpl implements LocationPresenter, OnFilterFinishL
 
     @Override
     public void onTextEdited(String searchable) {
+        if(searchable.isEmpty()){
+
+        }
         if(searchable.length() >= 3)
         locationData.filtrate(LocationPresenterImpl.this, searchable);
     }

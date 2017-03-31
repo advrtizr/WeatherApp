@@ -11,26 +11,20 @@ import android.widget.TextView;
 
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
-import com.advrtizr.weatherservice.presenter.WeatherPresenter;
 
 import java.util.List;
+import java.util.Map;
 
 import butterknife.ButterKnife;
 
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder> {
 
     private Context context;
-    private List<String> keys;
-    private List<WeatherPresenter> presenters;
-    private SharedPreferences locationPreferences;
-    private WeatherDatabase weatherDatabase;
+    private List<WeatherInfo> response;
 
-    public WeatherAdapter(Context context, List<String> keys, List<WeatherPresenter> presenters, SharedPreferences preferences) {
+    public WeatherAdapter(Context context, List<WeatherInfo> list) {
         this.context = context;
-        this.keys = keys;
-        this.presenters = presenters;
-        this.locationPreferences = preferences;
-        weatherDatabase = new WeatherDatabase(context, preferences);
+        response = list;
         makeFirstRequest();
     }
 
@@ -42,26 +36,35 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
 
     @Override
     public void onBindViewHolder(WeatherViewHolder holder, int position) {
-        WeatherInfo weatherInfo = presenters.get(position).getWeatherInfo();
-        weatherDatabase.saveEntry(weatherInfo, position);
-        weatherDatabase.readEntry(holder, position);
+        WeatherInfo weatherInfo = response.get(position);
+        if (weatherInfo != null) {
+            String unitsQuery = weatherInfo.getQuery().getResults().getChannel().getUnits().getTemperature();
+            String temperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getTemp();
+            String cityQuery = weatherInfo.getQuery().getResults().getChannel().getLocation().getCity();
+            String countryQuery = weatherInfo.getQuery().getResults().getChannel().getLocation().getCountry();
+            String conditionsQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getText();
+            String codeQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getCode();
+            String temperature = temperatureQuery + "\u00B0" + unitsQuery;
+            holder.temperature.setText(temperature);
+            holder.location.setText(cityQuery + ", " + countryQuery);
+            holder.conditions.setText(conditionsQuery);
+            int resource = context.getResources().getIdentifier("@drawable/icon_" + codeQuery, null, context.getPackageName());
+            holder.conditionImage.setImageResource(resource);
+        }
     }
-
 
     @Override
     public int getItemCount() {
-        return presenters.size();
+        return response.size();
     }
 
     private void makeFirstRequest() {
     }
 
-    class WeatherViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    class WeatherViewHolder extends RecyclerView.ViewHolder {
         TextView location;
         TextView temperature;
         TextView conditions;
-        ImageView refresh;
-        ImageView delete;
         ImageView conditionImage;
 
         WeatherViewHolder(View itemView) {
@@ -71,30 +74,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
             temperature = (TextView) itemView.findViewById(R.id.tv_temperature);
             conditions = (TextView) itemView.findViewById(R.id.tv_conditions);
             conditionImage = (ImageView) itemView.findViewById(R.id.iv_conditions);
-            refresh = (ImageView) itemView.findViewById(R.id.ib_refresh);
-            delete = (ImageView) itemView.findViewById(R.id.ib_delete);
-            refresh.setOnClickListener(this);
-            delete.setOnClickListener(this);
         }
 
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.ib_refresh:
-                    weatherDatabase.deleteEntry(getAdapterPosition(), false);
-                    presenters.get(getAdapterPosition()).loadWeather();
-                    break;
-                case R.id.ib_delete:
-                    String key = keys.get(getAdapterPosition());
-                    if (key.equals("")) {
-                        break;
-                    }
-                    locationPreferences.edit().remove(key).apply();
-                    presenters.remove(getAdapterPosition());
-                    weatherDatabase.deleteEntry(getAdapterPosition(), true);
-                    notifyItemRemoved(getAdapterPosition());
-                    break;
-            }
-        }
     }
 }

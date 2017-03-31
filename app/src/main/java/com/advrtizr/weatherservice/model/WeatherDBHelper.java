@@ -11,30 +11,18 @@ public class WeatherDBHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "WeatherDatabase";
 
-    public static final String TABLE_NAME = "weatherinfo";
+    public static final String TABLE_NAME = "weather_list";
     public static final String PRIMARY_ID = "_id";
-    public static final String ENTRY_ID = "entry";
-    public static final String CITY = "city";
-    public static final String COUNTRY = "country";
-    public static final String TEMPERATURE = "temperature";
-    public static final String UNITS = "UNITS";
-    public static final String CONDITIONS = "conditions";
-    public static final String CODE = "code";
+    public static final String ENTRY = "entry";
 
     private static final String TEXT_TYPE = " TEXT";
-    private static final String COMMA_SEP = ",";
+    private static final String COMMA_SEP = ", ";
     private static final String SQL_CREATE_ENTRIES =
             "CREATE TABLE " + TABLE_NAME + " (" +
-                    PRIMARY_ID + " INTEGER PRIMARY KEY, " +
-                    ENTRY_ID + TEXT_TYPE + COMMA_SEP +
-                    CITY + TEXT_TYPE + COMMA_SEP +
-                    COUNTRY + TEXT_TYPE + COMMA_SEP +
-                    TEMPERATURE + TEXT_TYPE + COMMA_SEP +
-                    UNITS + TEXT_TYPE + COMMA_SEP +
-                    CONDITIONS + TEXT_TYPE + COMMA_SEP +
-                    CODE + TEXT_TYPE + " )";
+                    PRIMARY_ID + " INTEGER PRIMARY KEY" + COMMA_SEP +
+                    ENTRY + TEXT_TYPE + " )";
 
-    private static final String SQL_DELETE_ENTRIES =
+    public static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + TABLE_NAME;
 
     private WeatherDBHelper(Context context) {

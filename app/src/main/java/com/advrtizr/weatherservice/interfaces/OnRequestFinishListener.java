@@ -1,7 +1,8 @@
 package com.advrtizr.weatherservice.interfaces;
 
-public interface OnRequestFinishListener {
-    void onResult(Object obj);
+import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 
+public interface OnRequestFinishListener {
+    void onResult(String id, WeatherInfo weatherInfo);
     void onFailure(Throwable t);
 }
