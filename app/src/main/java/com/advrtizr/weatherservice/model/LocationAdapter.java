@@ -38,11 +38,11 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     public void onBindViewHolder(final LocationHolder holder, int position) {
         final String city = locList.get(position);
         holder.location.setText(city);
-        checkStatus(city, holder);
+        final String key = city;
+        checkStatus(key, holder);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String key = city;
                 if (!holder.checkBox.isChecked()) {
                     holder.checkBox.setChecked(true);
                     locationPref.edit().putString(key, city).apply();
@@ -60,30 +60,10 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
         return locList.size();
     }
 
-    private void disableCheck(LocationHolder holder) {
-        if (maxCounter() == MAX_CHECKED) {
-            holder.itemView.setEnabled(holder.checkBox.isChecked());
-            holder.checkBox.setEnabled(holder.checkBox.isChecked());
-        } else {
-            holder.itemView.setEnabled(true);
-            holder.checkBox.setEnabled(true);
-        }
-    }
-
-    private int maxCounter() {
-        int maxCounter = 0;
-        for (int i = 0; i < locList.size(); i++) {
-            if (locationPref.contains(String.valueOf(i))) {
-                maxCounter++;
-            }
-        }
-        return maxCounter;
-    }
 
     private void checkStatus(String key, LocationHolder holder) {
         boolean isContain = locationPref.contains(String.valueOf(key));
         holder.checkBox.setChecked(isContain);
-        disableCheck(holder);
     }
 
     class LocationHolder extends RecyclerView.ViewHolder {

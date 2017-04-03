@@ -11,21 +11,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
+import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+
 import com.advrtizr.weatherservice.R;
+import com.advrtizr.weatherservice.interfaces.OnListChangeListener;
+import com.advrtizr.weatherservice.interfaces.OnStartDragListener;
+import com.advrtizr.weatherservice.model.SimpleItemTouchHelperCallback;
 import com.advrtizr.weatherservice.model.WeatherAdapter;
 import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 import com.advrtizr.weatherservice.presenter.WeatherPresenter;
 import com.advrtizr.weatherservice.presenter.WeatherPresenterImpl;
 import com.advrtizr.weatherservice.view.WeatherView;
-import java.util.ArrayList;
+
 import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class WeatherActivity extends AppCompatActivity implements WeatherView, View.OnClickListener {
+public class WeatherActivity extends AppCompatActivity implements WeatherView, View.OnClickListener, OnListChangeListener, OnStartDragListener {
 
     @BindView(R.id.card_container)
     RecyclerView recyclerView;
@@ -50,12 +57,11 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_SHORT);
 
         locationPref = getSharedPreferences(LocationActivity.LOCATION_PREF, MODE_PRIVATE);
-        touchHelper = new ItemTouchHelper(callbackHelper());
-        touchHelper.attachToRecyclerView(recyclerView);
 
         initFab();
         initRefresh();
         initPresenter();
+
     }
 
     @Override
@@ -68,9 +74,9 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
                 ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-                presenter.moveItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+
                 weatherAdapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-//                weatherAdapter.notifyItemRangeRemoved(0, previousContentSize);
+                presenter.moveItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
                 return true;
             }
 
@@ -82,10 +88,13 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         };
     }
 
-    private void initAdapter(List<WeatherInfo> list){
-        weatherAdapter = new WeatherAdapter(this, list);
+    private void initAdapter(List<WeatherInfo> list) {
+        weatherAdapter = new WeatherAdapter(this, list, this, this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.hasFixedSize();
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(weatherAdapter);
+        touchHelper = new ItemTouchHelper(callback);
+        touchHelper.attachToRecyclerView(recyclerView);
         recyclerView.setAdapter(weatherAdapter);
     }
 
@@ -99,9 +108,9 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         refreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                if(locationPref.getAll().size() != 0){
+                if (locationPref.getAll().size() != 0) {
                     initPresenter();
-                }else{
+                } else {
                     refreshLayout.setRefreshing(false);
                     snackbar.setText(R.string.warning).show();
                 }
@@ -182,5 +191,15 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
     public void onClick(View v) {
         Intent toLocation = new Intent(this, LocationActivity.class);
         startActivity(toLocation);
+    }
+
+    @Override
+    public void onListChanged(List<WeatherInfo> list) {
+        if(list != null) presenter.saveData(list);
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        touchHelper.startDrag(viewHolder);
     }
 }
