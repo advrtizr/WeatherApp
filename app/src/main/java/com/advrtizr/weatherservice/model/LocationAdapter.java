@@ -38,7 +38,8 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     public void onBindViewHolder(final LocationHolder holder, int position) {
         final String city = locList.get(position);
         holder.location.setText(city);
-        final String key = city;
+
+        final String key = generateKey(city);
         checkStatus(key, holder);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,6 +59,15 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     @Override
     public int getItemCount() {
         return locList.size();
+    }
+
+    private String generateKey(String str){
+        StringBuilder sb = new StringBuilder();
+        String[] strings = str.split(", ");
+        for(String string : strings){
+            sb.append(string);
+        }
+        return sb.toString();
     }
 
 

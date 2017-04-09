@@ -5,16 +5,25 @@ import com.google.gson.annotations.SerializedName;
 
 public class WeatherInfo {
 
-@SerializedName("query")
-@Expose
-private Query query;
+    @SerializedName("query")
+    @Expose
+    private Query query;
+    private String key;
 
-public Query getQuery() {
-return query;
-}
+    public String getKey() {
+        return key;
+    }
 
-public void setQuery(Query query) {
-this.query = query;
-}
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public Query getQuery() {
+        return query;
+    }
+
+    public void setQuery(Query query) {
+        this.query = query;
+    }
 
 }

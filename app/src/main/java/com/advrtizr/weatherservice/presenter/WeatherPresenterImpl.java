@@ -44,14 +44,17 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
         String unit = unitPref.getString(SettingsInteractorImpl.UNIT, null);
         Map<String, ?> locationList = locationPref.getAll();
         List<String> loc = new ArrayList<>();
+        List<String> keys = new ArrayList<>();
         for (Map.Entry location : locationList.entrySet()) {
             if (location == null) {
                 return;
             }
+            String key = location.getKey().toString();
             String city = location.getValue().toString();
+            keys.add(key);
             loc.add(city);
         }
-        WeatherModel model = new WeatherCompiler(this, loc, unit);
+        WeatherModel model = new WeatherCompiler(this, keys, loc, unit);
         view.showProgress();
         model.requestWeather();
     }

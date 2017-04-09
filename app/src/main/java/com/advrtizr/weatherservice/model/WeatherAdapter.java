@@ -2,7 +2,11 @@ package com.advrtizr.weatherservice.model;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.support.v4.view.MotionEventCompat;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
@@ -15,6 +19,7 @@ import android.widget.TextView;
 
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.interfaces.ItemTouchHelperAdapter;
+import com.advrtizr.weatherservice.interfaces.ItemTouchHelperViewHolder;
 import com.advrtizr.weatherservice.interfaces.OnListChangeListener;
 import com.advrtizr.weatherservice.interfaces.OnStartDragListener;
 import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
@@ -28,16 +33,18 @@ import butterknife.ButterKnife;
 public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder> implements ItemTouchHelperAdapter{
 
     private Context context;
+    private SharedPreferences preferences;
     private List<WeatherInfo> response;
     private OnListChangeListener listChangeListener;
     private OnStartDragListener startDragListener;
 
-    public WeatherAdapter(Context context, List<WeatherInfo> list, OnListChangeListener listChangeListener, OnStartDragListener startDragListener) {
+    public WeatherAdapter(Context context, SharedPreferences preferences, List<WeatherInfo> list, OnListChangeListener listChangeListener, OnStartDragListener startDragListener) {
         this.context = context;
+        this.preferences = preferences;
         response = list;
         this.listChangeListener = listChangeListener;
         this.startDragListener = startDragListener;
-        makeFirstRequest();
+        Log.i("adapter", " adapter list size " + String.valueOf(list.size()));
     }
 
     @Override
@@ -62,7 +69,7 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
             holder.conditions.setText(conditionsQuery);
             int resource = context.getResources().getIdentifier("@drawable/icon_" + codeQuery, null, context.getPackageName());
             holder.conditionImage.setImageResource(resource);
-            Log.i("drag", String.valueOf(position) + "/" + response.size());
+            int backgroundResource = context.getResources().getIdentifier("@drawable/test_background", null, context.getPackageName());
         }
         holder.handleView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -80,29 +87,34 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
         return response.size();
     }
 
-    private void makeFirstRequest() {
-    }
-
     @Override
-    public void onItemMove(int fromPosition, int toPosition) {
-        Collections.swap(response, fromPosition, toPosition);
-        listChangeListener.onListChanged(response);
-        notifyItemMoved(fromPosition, toPosition);
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        this.notifyItemMoved(fromPosition, toPosition);
+        return true;
     }
 
     @Override
     public void onItemDismiss(int position) {
+        String key = response.get(position).getKey();
+        preferences.edit().remove(key).apply();
         response.remove(position);
         listChangeListener.onListChanged(response);
-        notifyItemRemoved(position);
+        this.notifyItemRemoved(position);
     }
 
-    class WeatherViewHolder extends RecyclerView.ViewHolder {
+    @Override
+    public void onDrop(int mFrom, int mTo) {
+        Collections.swap(response, mFrom, mTo);
+        listChangeListener.onListChanged(response);
+    }
+
+    class WeatherViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
         TextView location;
         TextView temperature;
         TextView conditions;
         ImageView conditionImage;
         ImageView handleView;
+        CardView itemCard;
 
         WeatherViewHolder(View itemView) {
             super(itemView);
@@ -111,8 +123,18 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
             temperature = (TextView) itemView.findViewById(R.id.tv_temperature);
             conditions = (TextView) itemView.findViewById(R.id.tv_conditions);
             conditionImage = (ImageView) itemView.findViewById(R.id.iv_conditions);
-            handleView = (ImageView) itemView.findViewById(R.id.ib_refresh);
+            handleView = (ImageView) itemView.findViewById(R.id.ib_drag);
+            itemCard = (CardView) itemView.findViewById(R.id.weather_item_card);
         }
 
+        @Override
+        public void onItemSelected() {
+            itemView.setBackgroundColor(Color.LTGRAY);
+        }
+
+        @Override
+        public void onItemClear() {
+            itemView.setBackgroundColor(0);
+        }
     }
 }

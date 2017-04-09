@@ -12,21 +12,21 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
-import android.view.DragEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.advrtizr.weatherservice.R;
+import com.advrtizr.weatherservice.interfaces.ItemTouchHelperViewHolder;
 import com.advrtizr.weatherservice.interfaces.OnListChangeListener;
 import com.advrtizr.weatherservice.interfaces.OnStartDragListener;
-import com.advrtizr.weatherservice.model.SimpleItemTouchHelperCallback;
 import com.advrtizr.weatherservice.model.WeatherAdapter;
 import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 import com.advrtizr.weatherservice.presenter.WeatherPresenter;
 import com.advrtizr.weatherservice.presenter.WeatherPresenterImpl;
 import com.advrtizr.weatherservice.view.WeatherView;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -48,6 +48,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
     private WeatherPresenter presenter;
     private ItemTouchHelper touchHelper;
     private SharedPreferences locationPref;
+    private List<WeatherInfo> weather = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +62,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         initFab();
         initRefresh();
         initPresenter();
-
+        initAdapter(weather);
     }
 
     @Override
@@ -69,39 +70,21 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         super.onResume();
     }
 
-    private ItemTouchHelper.Callback callbackHelper() {
-        return new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
-                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
-            @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-
-                weatherAdapter.notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-                presenter.moveItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
-                return true;
-            }
-
-            @Override
-            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                presenter.deleteItem(viewHolder.getAdapterPosition());
-                weatherAdapter.notifyItemRemoved(viewHolder.getAdapterPosition());
-            }
-        };
-    }
-
-    private void initAdapter(List<WeatherInfo> list) {
-        weatherAdapter = new WeatherAdapter(this, list, this, this);
+    public void initAdapter(List<WeatherInfo> list) {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.hasFixedSize();
-        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(weatherAdapter);
-        touchHelper = new ItemTouchHelper(callback);
+        weatherAdapter = new WeatherAdapter(this, locationPref, list, this, this);
+        touchHelper = new ItemTouchHelper(callback());
         touchHelper.attachToRecyclerView(recyclerView);
         recyclerView.setAdapter(weatherAdapter);
     }
 
-
     private void initPresenter() {
         presenter = new WeatherPresenterImpl(WeatherActivity.this, locationPref);
         presenter.requestWeather();
+        if(presenter.loadWeather()!= null){
+            weather = presenter.loadWeather();
+        }
     }
 
     private void initRefresh() {
@@ -145,6 +128,58 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         });
     }
 
+    private ItemTouchHelper.Callback callback() {
+        ItemTouchHelper.Callback callback = new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP | ItemTouchHelper.DOWN,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            private Integer mFrom = null;
+            private Integer mTo = null;
+
+            @Override
+            public boolean isLongPressDragEnabled() {
+                return false;
+            }
+
+            @Override
+            public boolean isItemViewSwipeEnabled() {
+                return true;
+            }
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder source, RecyclerView.ViewHolder target) {
+                if (source.getItemViewType() != target.getItemViewType()) {
+                    return false;
+                }
+
+                if (mFrom == null) mFrom = source.getAdapterPosition();
+                mTo = target.getAdapterPosition();
+
+                weatherAdapter.onItemMove(source.getAdapterPosition(), target.getAdapterPosition());
+                return true;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                weatherAdapter.onItemDismiss(viewHolder.getAdapterPosition());
+            }
+            @Override
+            public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                super.clearView(recyclerView, viewHolder);
+
+                if (viewHolder instanceof ItemTouchHelperViewHolder) {
+                    ItemTouchHelperViewHolder itemViewHolder = (ItemTouchHelperViewHolder) viewHolder;
+                    itemViewHolder.onItemClear();
+                }
+
+                if (mFrom != null && mTo != null)
+                    weatherAdapter.onDrop(mFrom, mTo);
+
+                mFrom = mTo = null;
+            }
+        };
+        return callback;
+    }
+
     @Override
     public void showProgress() {
 
@@ -157,14 +192,16 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
 
     @Override
     public void onRequestSuccess(List<WeatherInfo> list) {
+//        weather = list;
         initAdapter(list);
+//        weatherAdapter.notifyDataSetChanged();
+        Log.i("adapter", "list size " + String.valueOf(list.size()));
         snackbar.setText(R.string.snackbar_refreshed);
         snackbar.show();
     }
 
     @Override
     public void onRequestError(List<WeatherInfo> list) {
-        initAdapter(list);
         snackbar.setText(R.string.snackbar_connection_error);
         refreshLayout.setRefreshing(false);
         snackbar.show();

@@ -20,13 +20,15 @@ public class WeatherCompiler implements WeatherModel{
 
     private OnRequestFinishListener listener;
     private List<String> locations;
+    private List<String> keys;
     private String unit;
     private Retrofit retrofit;
     private List<WeatherInfo> responseList;
     private int counter;
 
-    public WeatherCompiler(OnRequestFinishListener listener, List<String> locations, String unit) {
+    public WeatherCompiler(OnRequestFinishListener listener, List<String> keys, List<String> locations, String unit) {
         this.listener = listener;
+        this.keys = keys;
         this.locations = locations;
         this.unit = unit;
         responseList = new ArrayList<>();
@@ -36,7 +38,7 @@ public class WeatherCompiler implements WeatherModel{
                 .build();
     }
 
-    private void performRequest(final int position, final String location){
+    private void performRequest(final int position, final String key, final String location){
         String YQL = Constants.LOCATION_PART + location + Constants.UNIT_PART + unit + Constants.END_PART;
         WeatherRequest request = retrofit.create(WeatherRequest.class);
         request.getWeatherInfo(YQL).enqueue(new Callback<WeatherInfo>() {
@@ -44,6 +46,7 @@ public class WeatherCompiler implements WeatherModel{
             public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
                 if (response.body() != null) {
                     WeatherInfo weatherInfo = response.body();
+                    weatherInfo.setKey(key);
                     int responseCount = weatherInfo.getQuery().getCount();
                     if (responseCount != 0) {
                         responseList.remove(position);
@@ -71,8 +74,9 @@ public class WeatherCompiler implements WeatherModel{
         if(locations != null){
             for(int i = 0; i< locations.size(); i++){
                 responseList.add(null);
+                String key = keys.get(i);
                 String location = locations.get(i);
-                performRequest(i, location);
+                performRequest(i, key, location);
             }
         }
     }
