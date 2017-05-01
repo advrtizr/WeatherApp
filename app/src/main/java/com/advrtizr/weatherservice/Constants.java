@@ -12,4 +12,9 @@ public class Constants {
     //autocomplete request
     public static final String AC_BASE_URL = "http://gd.geobytes.com/";
     public static final String AC_GET_URI = "AutoCompleteCity?callback=?&";
+
+    public static final String WEATHER_DATA = "weather_data";
+    public static final String CELSIUS = "C";
+    public static final String FAHRENHEIT = "F";
+
 }

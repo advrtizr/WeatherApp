@@ -30,6 +30,7 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
     private SharedPreferences pref;
 
     private final static String SAVED_RESPONSE = "saved_response";
+    private final static String RESPONSE_LIST = "response_list";
 
     public WeatherPresenterImpl(WeatherView view, SharedPreferences locationPref) {
         this.view = view;
@@ -54,6 +55,7 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
             keys.add(key);
             loc.add(city);
         }
+        Log.i("list", "list in presenter " + String.valueOf(locationList.size()));
         WeatherModel model = new WeatherCompiler(this, keys, loc, unit);
         view.showProgress();
         model.requestWeather();
@@ -76,13 +78,13 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
     @Override
     public void saveData(List<WeatherInfo> infoList) {
         String json = new Gson().toJson(infoList);
-        pref.edit().putString("response", json).apply();
+        pref.edit().putString(RESPONSE_LIST, json).apply();
         Log.i("move", "moveItem");
     }
 
     @Override
     public List<WeatherInfo> loadWeather() {
-        String json = pref.getString("response", null);
+        String json = pref.getString(RESPONSE_LIST, null);
         return new Gson().fromJson(json, new TypeToken<ArrayList<WeatherInfo>>() {
         }.getType());
     }
@@ -94,10 +96,10 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
             return infoList;
         }
         for(int i = 0; i < restoredList.size(); i++){
-            String restored = restoredList.get(i).getQuery().getResults().getChannel().getLocation().getCity();
+            String restored = restoredList.get(i).getKey();
             for(int j = 0; j < infoList.size(); j++){
-                String response = infoList.get(j).getQuery().getResults().getChannel().getLocation().getCity();
-                if(response.equals(restored)) {
+                String response = infoList.get(j).getKey();
+                if(response != null && response.equals(restored)) {
                     Log.i("sort", String.valueOf(i) + " " + response + "+");
                     matchedList.add(infoList.get(j));
                     infoList.remove(j);

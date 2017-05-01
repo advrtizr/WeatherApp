@@ -4,20 +4,21 @@
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/colorDarkGray</item>
+        <item name="colorPrimaryDark">@color/colorDarkGray</item>
+        <item name="colorAccent">@color/colorWhite</item>
     </style>
 
     <style name="NoActionbar" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimary</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/colorDarkGray</item>
+        <item name="colorPrimaryDark">@color/colorDarkGray</item>
+        <item name="colorAccent">@color/colorWhite</item>
+        <item name="android:textColorSecondary">@color/colorWhite</item>
     </style>
 
     <style name="MaterialSearchViewStyle">
         <!-- Background for the search bar -->
-        <item name="searchBackground">@color/colorPrimary</item>
+        <item name="searchBackground">@color/colorDarkGray</item>
 
         <!-- Change voice icon -->
         <item name="searchVoiceIcon">@drawable/ic_action_voice_search_inverted</item>
@@ -35,7 +36,7 @@
         <item name="searchSuggestionBackground">@android:color/white</item>
 
         <!-- Change text color for edit text. This will also be the color of the cursor -->
-        <item name="android:textColor">@color/white</item>
+        <item name="android:textColor">@color/colorWhite</item>
 
         <!-- Change hint text color for edit text -->
         <item name="android:textColorHint">@color/colorLightGray</item>
@@ -48,6 +49,20 @@
         <item name="android:background">@drawable/line_separator</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">1dp</item>
+    </style>
+
+    <style name="HorizontalLineSeparator">
+        <item name="android:background">@drawable/line_separator</item>
+        <item name="android:color">@color/colorWhite</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+    </style>
+
+    <style name="VerticalLineSeparator">
+        <item name="android:background">@drawable/line_separator</item>
+        <item name="android:color">@color/colorWhite</item>
+        <item name="android:layout_width">1dp</item>
+        <item name="android:layout_height">match_parent</item>
     </style>
 
     <style name="CardLineSeparator">
@@ -67,6 +82,4 @@
         <item name="android:layout_alignParentRight">true</item>
         <item name="android:layout_centerInParent">true</item>
     </style>
-
-
 </resources>

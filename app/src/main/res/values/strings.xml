@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">WeatherService</string>
+    <string name="app_name">Погода</string>
     <string name="location">Location</string>
+    <string name="time">Time</string>
     <string name="conditions">Conditions</string>
     <string name="not_available">N/A</string>
     <string name="select_country">Select country</string>
@@ -20,4 +21,5 @@
     <string name="snackbar_connection_error">Пожалуйста, проверьте подключение</string>
     <string name="search_city">Поиск…</string>
     <string name="warning">Вы не выбрали город</string>
+    <string name="transition_temperature">transition_temperature</string>
 </resources>

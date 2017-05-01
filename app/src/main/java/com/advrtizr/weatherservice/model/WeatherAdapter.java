@@ -1,36 +1,51 @@
 package com.advrtizr.weatherservice.model;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.AnimationDrawable;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.transition.TransitionManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.ActivityOptionsCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.GridLayout;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.advrtizr.weatherservice.Constants;
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.interfaces.ItemTouchHelperAdapter;
 import com.advrtizr.weatherservice.interfaces.ItemTouchHelperViewHolder;
 import com.advrtizr.weatherservice.interfaces.OnListChangeListener;
 import com.advrtizr.weatherservice.interfaces.OnStartDragListener;
+import com.advrtizr.weatherservice.model.json.weather.Forecast;
+import com.advrtizr.weatherservice.model.json.weather.Image;
 import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
+import com.advrtizr.weatherservice.ui.DetailsActivity;
 
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 
-import butterknife.ButterKnife;
-
-public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder> implements ItemTouchHelperAdapter{
+public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherViewHolder> implements ItemTouchHelperAdapter {
 
     private Context context;
     private SharedPreferences preferences;
@@ -57,19 +72,24 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
     public void onBindViewHolder(final WeatherViewHolder holder, int position) {
         WeatherInfo weatherInfo = response.get(position);
         if (weatherInfo != null) {
-            String unitsQuery = weatherInfo.getQuery().getResults().getChannel().getUnits().getTemperature();
             String temperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getTemp();
+            String minTemperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getForecast().get(0).getLow() + "\u00B0";
+            String maxTemperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getForecast().get(0).getHigh() + "\u00B0";
             String cityQuery = weatherInfo.getQuery().getResults().getChannel().getLocation().getCity();
-            String countryQuery = weatherInfo.getQuery().getResults().getChannel().getLocation().getCountry();
             String conditionsQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getText();
             String codeQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getCode();
-            String temperature = temperatureQuery + "\u00B0" + unitsQuery;
+            String temperature = temperatureQuery + "\u00B0";
             holder.temperature.setText(temperature);
-            holder.location.setText(cityQuery + ", " + countryQuery);
+            holder.minTemperature.setText(minTemperatureQuery);
+            holder.maxTemperature.setText(maxTemperatureQuery);
+            holder.location.setText(cityQuery);
             holder.conditions.setText(conditionsQuery);
-            int resource = context.getResources().getIdentifier("@drawable/icon_" + codeQuery, null, context.getPackageName());
+            holder.forecastContainer.setVisibility(View.GONE);
+            int resource = context.getResources().getIdentifier("@drawable/ic_" + codeQuery, null, context.getPackageName());
             holder.conditionImage.setImageResource(resource);
-            int backgroundResource = context.getResources().getIdentifier("@drawable/test_background", null, context.getPackageName());
+            int backgroundResource = context.getResources().getIdentifier("@drawable/bg_" + codeQuery, null, context.getPackageName());
+            holder.itemCard.setBackgroundResource(backgroundResource);
+            setAnimation(holder);
         }
         holder.handleView.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -80,6 +100,22 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
                 return false;
             }
         });
+        holder.itemCard.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent detailsIntent = new Intent(context, DetailsActivity.class);
+                detailsIntent.putExtra(Constants.WEATHER_DATA, response.get(holder.getAdapterPosition()));
+                String transitionName = context.getString(R.string.transition_temperature);
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, holder.conditionImage, transitionName);
+                ActivityCompat.startActivity(context, detailsIntent, options.toBundle());
+            }
+        });
+    }
+
+    private void setAnimation(WeatherViewHolder holder) {
+        AnimationDrawable anim = (AnimationDrawable) holder.itemCard.getBackground();
+        anim.setExitFadeDuration(3000);
+        anim.start();
     }
 
     @Override
@@ -103,28 +139,41 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
     }
 
     @Override
-    public void onDrop(int mFrom, int mTo) {
+    public void onItemDrop(int mFrom, int mTo) {
         Collections.swap(response, mFrom, mTo);
         listChangeListener.onListChanged(response);
     }
 
     class WeatherViewHolder extends RecyclerView.ViewHolder implements ItemTouchHelperViewHolder {
+        RelativeLayout forecastContainer;
         TextView location;
         TextView temperature;
+        TextView minTemperature;
+        TextView maxTemperature;
         TextView conditions;
         ImageView conditionImage;
         ImageView handleView;
         CardView itemCard;
+        GridLayout gridLayout;
+        TextView forecastDay;
+        ImageView forecastImage;
+        TextView forecastTemperature;
 
         WeatherViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(itemView);
+            forecastContainer = (RelativeLayout) itemView.findViewById(R.id.forecast_container);
             location = (TextView) itemView.findViewById(R.id.tv_location);
             temperature = (TextView) itemView.findViewById(R.id.tv_temperature);
-            conditions = (TextView) itemView.findViewById(R.id.tv_conditions);
+            minTemperature = (TextView) itemView.findViewById(R.id.tv_min_temperature);
+            maxTemperature = (TextView) itemView.findViewById(R.id.tv_max_temperature);
+            conditions = (TextView) itemView.findViewById(R.id.tv_condition);
             conditionImage = (ImageView) itemView.findViewById(R.id.iv_conditions);
             handleView = (ImageView) itemView.findViewById(R.id.ib_drag);
             itemCard = (CardView) itemView.findViewById(R.id.weather_item_card);
+            gridLayout = (GridLayout) itemView.findViewById(R.id.gl_forecast);
+            forecastDay = (TextView) itemView.findViewById(R.id.tv_day);
+            forecastImage = (ImageView) itemView.findViewById(R.id.iv_image);
+            forecastTemperature= (TextView) itemView.findViewById(R.id.tv_forecast_temperature);
         }
 
         @Override

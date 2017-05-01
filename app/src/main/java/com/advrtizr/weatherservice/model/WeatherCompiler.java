@@ -56,8 +56,10 @@ public class WeatherCompiler implements WeatherModel{
                         if(locations.size() == counter)
                         listener.onResult(responseList);
                         Log.i("WC", "add");
+                        Log.i("list", "counter in compiler " + String.valueOf(counter));
                     } else {
-                        requestWeather();
+                        performRequest(position, key, location);
+                        Log.i("list", "request count 0 for " + String.valueOf(location));
                     }
                 }
             }
@@ -72,6 +74,7 @@ public class WeatherCompiler implements WeatherModel{
     @Override
     public void requestWeather() {
         if(locations != null){
+            Log.i("list", "list in compiler " + String.valueOf(locations.size()));
             for(int i = 0; i< locations.size(); i++){
                 responseList.add(null);
                 String key = keys.get(i);

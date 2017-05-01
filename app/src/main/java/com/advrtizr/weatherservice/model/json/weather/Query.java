@@ -3,7 +3,9 @@ package com.advrtizr.weatherservice.model.json.weather;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Query {
+import java.io.Serializable;
+
+public class Query implements Serializable {
 
 @SerializedName("count")
 @Expose

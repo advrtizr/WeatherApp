@@ -6,5 +6,8 @@
     <color name="colorAccent">#ff6e40</color>
     <color name="colorLightGray">#c7c7c7</color>
     <color name="transparent">#00000000</color>
-    <color name="white">#ffffff</color>
+    <color name="colorWhite">#ffffff</color>
+    <color name="colorDarkGray">#292929</color>
+    <color name="colorDarkGrayAlpha">#32292929</color>
+    <color name="colorWhiteAlpha">#32ffffff</color>
 </resources>

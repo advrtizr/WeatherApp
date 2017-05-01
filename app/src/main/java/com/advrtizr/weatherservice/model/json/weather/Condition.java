@@ -3,7 +3,9 @@ package com.advrtizr.weatherservice.model.json.weather;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Condition {
+import java.io.Serializable;
+
+public class Condition implements Serializable {
 
 @SerializedName("code")
 @Expose

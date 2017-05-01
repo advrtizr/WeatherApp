@@ -3,9 +3,10 @@ package com.advrtizr.weatherservice.model.json.weather;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Item {
+public class Item implements Serializable {
 
 @SerializedName("title")
 @Expose
