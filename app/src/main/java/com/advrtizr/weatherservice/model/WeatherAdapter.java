@@ -59,7 +59,6 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
         response = list;
         this.listChangeListener = listChangeListener;
         this.startDragListener = startDragListener;
-        Log.i("adapter", " adapter list size " + String.valueOf(list.size()));
     }
 
     @Override
@@ -73,12 +72,12 @@ public class WeatherAdapter extends RecyclerView.Adapter<WeatherAdapter.WeatherV
         WeatherInfo weatherInfo = response.get(position);
         if (weatherInfo != null) {
             String temperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getTemp();
-            String minTemperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getForecast().get(0).getLow() + "\u00B0";
-            String maxTemperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getForecast().get(0).getHigh() + "\u00B0";
+            String minTemperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getForecast().get(0).getLow() + Constants.DEGREE;
+            String maxTemperatureQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getForecast().get(0).getHigh() + Constants.DEGREE;
             String cityQuery = weatherInfo.getQuery().getResults().getChannel().getLocation().getCity();
             String conditionsQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getText();
             String codeQuery = weatherInfo.getQuery().getResults().getChannel().getItem().getCondition().getCode();
-            String temperature = temperatureQuery + "\u00B0";
+            String temperature = temperatureQuery + Constants.DEGREE;
             holder.temperature.setText(temperature);
             holder.minTemperature.setText(minTemperatureQuery);
             holder.maxTemperature.setText(maxTemperatureQuery);

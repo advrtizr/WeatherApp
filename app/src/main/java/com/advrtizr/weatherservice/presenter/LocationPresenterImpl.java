@@ -4,12 +4,15 @@ import com.advrtizr.weatherservice.interfaces.OnFilterFinishListener;
 import com.advrtizr.weatherservice.model.LocationData;
 import com.advrtizr.weatherservice.model.LocationModel;
 import com.advrtizr.weatherservice.view.LocationView;
+
+import java.util.LinkedList;
 import java.util.List;
 
 public class LocationPresenterImpl implements LocationPresenter, OnFilterFinishListener {
 
     private LocationView locationView;
     private LocationModel locationData;
+    private List<String> searchableList;
 
     public LocationPresenterImpl(LocationView locationView) {
         this.locationView = locationView;
@@ -18,16 +21,20 @@ public class LocationPresenterImpl implements LocationPresenter, OnFilterFinishL
 
     @Override
     public void onTextEdited(String searchable) {
-        if(searchable.isEmpty()){
-
+        searchableList = new LinkedList<>();
+        if (searchable.length() >= 3) {
+            searchableList.add(searchable);
+            locationData.filtrate(LocationPresenterImpl.this, searchable);
         }
-        if(searchable.length() >= 3)
-        locationData.filtrate(LocationPresenterImpl.this, searchable);
     }
 
     @Override
     public void onResult(List<String> filtered) {
-        locationView.displayLocation(filtered);
+        if (filtered.get(0).equals("")) {
+            locationView.displayLocation(searchableList);
+        } else {
+            locationView.displayLocation(filtered);
+        }
         locationView.onRequestSuccess();
     }
 

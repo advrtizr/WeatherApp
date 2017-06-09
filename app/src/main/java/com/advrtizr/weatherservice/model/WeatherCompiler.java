@@ -8,6 +8,7 @@ import com.advrtizr.weatherservice.interfaces.WeatherRequest;
 import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -31,35 +32,30 @@ public class WeatherCompiler implements WeatherModel{
         this.keys = keys;
         this.locations = locations;
         this.unit = unit;
-        responseList = new ArrayList<>();
+        responseList = new LinkedList<>();
         retrofit = new Retrofit.Builder()
                 .baseUrl(Constants.BASE_URL)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
     }
 
-    private void performRequest(final int position, final String key, final String location){
+    private void performRequest(final String key, final String location){
         String YQL = Constants.LOCATION_PART + location + Constants.UNIT_PART + unit + Constants.END_PART;
         WeatherRequest request = retrofit.create(WeatherRequest.class);
         request.getWeatherInfo(YQL).enqueue(new Callback<WeatherInfo>() {
             @Override
             public void onResponse(Call<WeatherInfo> call, Response<WeatherInfo> response) {
-                if (response.body() != null) {
+                if (response != null) {
                     WeatherInfo weatherInfo = response.body();
                     weatherInfo.setKey(key);
                     int responseCount = weatherInfo.getQuery().getCount();
                     if (responseCount != 0) {
-                        responseList.remove(position);
-                        responseList.add(position, weatherInfo);
-                        Log.i("comp", String.valueOf(position) + " " + location);
+                        responseList.add(weatherInfo);
                         counter++;
                         if(locations.size() == counter)
                         listener.onResult(responseList);
-                        Log.i("WC", "add");
-                        Log.i("list", "counter in compiler " + String.valueOf(counter));
                     } else {
-                        performRequest(position, key, location);
-                        Log.i("list", "request count 0 for " + String.valueOf(location));
+                        performRequest(key, location);
                     }
                 }
             }
@@ -74,12 +70,10 @@ public class WeatherCompiler implements WeatherModel{
     @Override
     public void requestWeather() {
         if(locations != null){
-            Log.i("list", "list in compiler " + String.valueOf(locations.size()));
             for(int i = 0; i< locations.size(); i++){
-                responseList.add(null);
                 String key = keys.get(i);
                 String location = locations.get(i);
-                performRequest(i, key, location);
+                performRequest(key, location);
             }
         }
     }

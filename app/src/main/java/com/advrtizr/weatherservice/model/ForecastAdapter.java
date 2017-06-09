@@ -8,15 +8,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.advrtizr.weatherservice.Constants;
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.model.json.weather.Forecast;
-
 import java.util.List;
 
 public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastViewHolder> {
 
-    Context context;
-    List<Forecast> forecastList;
+    private Context context;
+    private List<Forecast> forecastList;
 
     public ForecastAdapter(Context context, List<Forecast> forecastList) {
         this.context = context;
@@ -33,8 +33,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     public void onBindViewHolder(ForecastViewHolder holder, int position) {
         Forecast forecast = forecastList.get(position);
         String day = forecast.getDay();
-        String low = forecast.getLow() + "\u00B0";
-        String high = forecast.getHigh()+ "\u00B0";
+        String low = forecast.getLow() + Constants.DEGREE;
+        String high = forecast.getHigh()+ Constants.DEGREE;
         String code = forecast.getCode();
         holder.forecastDay.setText(day);
         int resource = context.getResources().getIdentifier("@drawable/ic_" + code, null, context.getPackageName());

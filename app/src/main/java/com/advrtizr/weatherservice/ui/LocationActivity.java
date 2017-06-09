@@ -38,8 +38,6 @@ public class LocationActivity extends AppCompatActivity implements LocationView 
     private Toolbar toolbar;
     private LocationPresenter presenter;
 
-    public static final String LOCATION_PREF = "location_pref";
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,7 +89,6 @@ public class LocationActivity extends AppCompatActivity implements LocationView 
         searchView.setOnQueryTextListener(new MaterialSearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                //Do some magic
                 return false;
             }
 
@@ -103,5 +100,4 @@ public class LocationActivity extends AppCompatActivity implements LocationView 
         });
         return true;
     }
-
 }

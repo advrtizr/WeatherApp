@@ -15,7 +15,9 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
+import com.advrtizr.weatherservice.Constants;
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.interfaces.ItemTouchHelperViewHolder;
 import com.advrtizr.weatherservice.interfaces.OnListChangeListener;
@@ -25,10 +27,8 @@ import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
 import com.advrtizr.weatherservice.presenter.WeatherPresenter;
 import com.advrtizr.weatherservice.presenter.WeatherPresenterImpl;
 import com.advrtizr.weatherservice.view.WeatherView;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -48,7 +48,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
     private WeatherPresenter presenter;
     private ItemTouchHelper touchHelper;
     private SharedPreferences locationPref;
-    private List<WeatherInfo> weather = new ArrayList<>();
+    private List<WeatherInfo> weather;
     private Toolbar toolbar;
 
     @Override
@@ -56,6 +56,24 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
         ButterKnife.bind(this);
+
+        snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_SHORT);
+        locationPref = getSharedPreferences(Constants.LOCATION_PREF, MODE_PRIVATE);
+        weather = new ArrayList<>();
+
+        initToolbar();
+        initFab();
+        initRefresh();
+        initPresenter();
+        initAdapter(weather);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    public void initToolbar(){
         toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         toolbar.inflateMenu(R.menu.menu_main);
         toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -70,18 +88,6 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
                 return false;
             }
         });
-        snackbar = Snackbar.make(coordinatorLayout, "", Snackbar.LENGTH_SHORT);
-        locationPref = getSharedPreferences(LocationActivity.LOCATION_PREF, MODE_PRIVATE);
-
-        initFab();
-        initRefresh();
-        initPresenter();
-        initAdapter(weather);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
     }
 
     public void initAdapter(List<WeatherInfo> list) {
@@ -208,9 +214,7 @@ public class WeatherActivity extends AppCompatActivity implements WeatherView, V
 
     @Override
     public void onRequestSuccess(List<WeatherInfo> list) {
-//        weather = list;
         initAdapter(list);
-//        weatherAdapter.notifyDataSetChanged();
         Log.i("adapter", "list size " + String.valueOf(list.size()));
         snackbar.setText(R.string.snackbar_refreshed);
         snackbar.show();

@@ -5,8 +5,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.advrtizr.weatherservice.Constants;
 import com.advrtizr.weatherservice.interfaces.OnRequestFinishListener;
-import com.advrtizr.weatherservice.model.SettingsInteractorImpl;
+import com.advrtizr.weatherservice.model.SettingsModelImpl;
 import com.advrtizr.weatherservice.model.WeatherCompiler;
 import com.advrtizr.weatherservice.model.WeatherModel;
 import com.advrtizr.weatherservice.model.json.weather.WeatherInfo;
@@ -15,7 +16,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,15 +37,16 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
         context = ((Activity) view).getBaseContext();
         pref = context.getSharedPreferences(SAVED_RESPONSE, MODE_PRIVATE);
         this.locationPref = locationPref;
-        unitPref = context.getSharedPreferences(SettingsInteractorImpl.SETTINGS_PREF, MODE_PRIVATE);
+        unitPref = context.getSharedPreferences(Constants.SETTINGS_PREF, MODE_PRIVATE);
     }
 
     @Override
     public void requestWeather() {
-        String unit = unitPref.getString(SettingsInteractorImpl.UNIT, null);
+        String unit = unitPref.getString(Constants.UNIT, null);
         Map<String, ?> locationList = locationPref.getAll();
         List<String> loc = new ArrayList<>();
         List<String> keys = new ArrayList<>();
+
         for (Map.Entry location : locationList.entrySet()) {
             if (location == null) {
                 return;
@@ -55,7 +56,6 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
             keys.add(key);
             loc.add(city);
         }
-        Log.i("list", "list in presenter " + String.valueOf(locationList.size()));
         WeatherModel model = new WeatherCompiler(this, keys, loc, unit);
         view.showProgress();
         model.requestWeather();
@@ -64,7 +64,7 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
     @Override
     public void onResult(List<WeatherInfo> infoList) {
         if (infoList != null) {
-            saveData(sorted(infoList));
+            saveData(sort(infoList));
             view.hideProgress();
             view.onRequestSuccess(loadWeather());
         }
@@ -79,7 +79,6 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
     public void saveData(List<WeatherInfo> infoList) {
         String json = new Gson().toJson(infoList);
         pref.edit().putString(RESPONSE_LIST, json).apply();
-        Log.i("move", "moveItem");
     }
 
     @Override
@@ -89,7 +88,7 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
         }.getType());
     }
 
-    private List<WeatherInfo> sorted(List<WeatherInfo> infoList){
+    private List<WeatherInfo> sort(List<WeatherInfo> infoList){
         List<WeatherInfo> matchedList = new ArrayList<>();
         List<WeatherInfo> restoredList = loadWeather();
         if(restoredList == null){
@@ -100,7 +99,6 @@ public class WeatherPresenterImpl implements WeatherPresenter, OnRequestFinishLi
             for(int j = 0; j < infoList.size(); j++){
                 String response = infoList.get(j).getKey();
                 if(response != null && response.equals(restored)) {
-                    Log.i("sort", String.valueOf(i) + " " + response + "+");
                     matchedList.add(infoList.get(j));
                     infoList.remove(j);
                 }

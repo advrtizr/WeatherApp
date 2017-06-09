@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
 
+import com.advrtizr.weatherservice.Constants;
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.ui.LocationActivity;
 
@@ -20,12 +21,11 @@ public class LocationAdapter extends RecyclerView.Adapter<LocationAdapter.Locati
     private Context context;
     private List<String> locList = new ArrayList<>();
     private SharedPreferences locationPref;
-    private final int MAX_CHECKED = 10;
 
     public LocationAdapter(Context context, List<String> locList) {
         this.context = context;
         this.locList = locList;
-        locationPref = context.getSharedPreferences(LocationActivity.LOCATION_PREF, Context.MODE_PRIVATE);
+        locationPref = context.getSharedPreferences(Constants.LOCATION_PREF, Context.MODE_PRIVATE);
     }
 
     @Override

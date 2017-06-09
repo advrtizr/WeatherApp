@@ -11,11 +11,11 @@ import android.view.animation.Animation;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.advrtizr.weatherservice.Constants;
 import com.advrtizr.weatherservice.R;
 import com.advrtizr.weatherservice.presenter.SettingsPresenter;
 import com.advrtizr.weatherservice.presenter.SettingsPresenterImpl;
 import com.advrtizr.weatherservice.view.SettingsView;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -26,8 +26,6 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     @BindView(R.id.temp_unit_value)
     TextView tempValue;
 
-    private final String CELSIUS = "C";
-    private final String FAHRENHEIT = "F";
     private SettingsPresenter presenter;
 
     @Override
@@ -67,11 +65,11 @@ public class SettingsActivity extends AppCompatActivity implements View.OnClickL
     public boolean onMenuItemClick(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.unit_celsius:
-                presenter.saveToSettings(CELSIUS);
+                presenter.saveToSettings(Constants.CELSIUS);
                 presenter.loadSettings();
                 return true;
             case R.id.unit_fahrenheit:
-                presenter.saveToSettings(FAHRENHEIT);
+                presenter.saveToSettings(Constants.FAHRENHEIT);
                 presenter.loadSettings();
                 return true;
             default:

@@ -1,5 +1,7 @@
 package com.advrtizr.weatherservice.model;
 
+import android.util.Log;
+
 import com.advrtizr.weatherservice.Constants;
 import com.advrtizr.weatherservice.interfaces.LocationsRequest;
 import com.advrtizr.weatherservice.interfaces.OnFilterFinishListener;
@@ -27,7 +29,7 @@ public class LocationData implements LocationModel {
     public LocationData() {
 
         retrofit = new Retrofit.Builder()
-                .addConverterFactory(new GsonPConverterFactory(new Gson()))
+                .addConverterFactory(new ConverterFactory(new Gson()))
                 .baseUrl(Constants.AC_BASE_URL)
                 .build();
     }
@@ -39,8 +41,9 @@ public class LocationData implements LocationModel {
         request.getAutoComplete(text).enqueue(new Callback<List<String>>() {
             @Override
             public void onResponse(Call<List<String>> call, Response<List<String>> response) {
-                if (response.body() != null) {
+                if (response != null) {
                     List<String> responseList = response.body();
+                    Log.i("response", "size " + responseList.get(0));
                     listener.onResult(responseList);
                 }
             }
@@ -52,20 +55,19 @@ public class LocationData implements LocationModel {
         });
     }
 
-    private class GsonPConverterFactory extends Converter.Factory {
+    private class ConverterFactory extends Converter.Factory {
 
         Gson gson;
 
-        GsonPConverterFactory(Gson gson) {
-            if (gson == null) throw new NullPointerException("gson == null");
-            this.gson = gson;
+        ConverterFactory(Gson gson) {
+            if (gson != null) this.gson = gson;
         }
 
         @Override
         public Converter<ResponseBody, ?> responseBodyConverter(Type type, Annotation[] annotations,
                                                                 Retrofit retrofit) {
             TypeAdapter<?> adapter = gson.getAdapter(TypeToken.get(type));
-            return new GsonPResponseBodyConverter<>(gson, adapter);
+            return new ResponseBodyConverter<>(gson, adapter);
         }
 
         @Override
@@ -77,11 +79,11 @@ public class LocationData implements LocationModel {
         }
     }
 
-    private class GsonPResponseBodyConverter<T> implements Converter<ResponseBody, T> {
+    private class ResponseBodyConverter<T> implements Converter<ResponseBody, T> {
         private final Gson gson;
         private final TypeAdapter<T> adapter;
 
-        GsonPResponseBodyConverter(Gson gson, TypeAdapter<T> adapter) {
+        ResponseBodyConverter(Gson gson, TypeAdapter<T> adapter) {
             this.gson = gson;
             this.adapter = adapter;
         }
@@ -89,7 +91,7 @@ public class LocationData implements LocationModel {
         @Override
         public T convert(ResponseBody value) throws IOException {
             Reader reader = value.charStream();
-            int item = reader.read();
+            int item = 0;
             while (item != '(' && item != -1) {
                 item = reader.read();
             }
